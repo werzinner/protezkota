@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>İsimler - Sabit / Hareketli + Not</title>
+<style>
+body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:15px;background:#fafafa}
+.card{border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:15px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.name{font-weight:600;margin-bottom:8px;font-size:16px;color:#333}
+.options{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px}
+.opt{display:flex;align-items:center;gap:5px}
+input[type="checkbox"]{width:20px;height:20px}
+textarea{width:100%;padding:8px;font-size:14px;border:1px solid #ccc;border-radius:4px;resize:vertical;min-height:40px}
+@media(max-width:600px){.options{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<h2>İsimler — Sabit / Hareketli + Not</h2>
+
+<div id="list"></div>
+
+<script>
+const names = [
+  "CENNET YILDIZ","NİDA NUR SOLAK","SIMGE DÜZEN","AHMET KALAYCI",
+  "PELIN BALKESEN","MUHAMMED EREN AKTAŞ","ECE KELEŞ","MEHMET BARAN BIRLIK",
+  "SÜMEYRA KAVAS","FATMA ZEHRA YAŞAR","ABDULLAH YÜZER","NISA KAYA",
+  "MÜMÜNE ÖZCAN","DUYGUNUR ERDOĞDU","EFE OKYAR","ÇİĞDEM SAKINCI",
+  "BERKANT GİLİK","BERRAK ALTUNTAŞ","ATAKAN KAYA","SUEDA ŞAHİN",
+  "ALEYNA SİDRET DEMİR","EREN SELİMLER"
+];
+
+const options = ["Sabit 1","Sabit 2","Hareketli 1","Hareketli 2"];
+const container = document.getElementById("list");
+
+// Kaydedilmiş veriler
+const savedData = JSON.parse(localStorage.getItem("data") || "{}");
+
+names.forEach((name,i)=>{
+  const card=document.createElement("div");
+  card.className="card";
+
+  const title=document.createElement("div");
+  title.className="name";
+  title.textContent=name;
+  card.appendChild(title);
+
+  const optContainer=document.createElement("div");
+  optContainer.className="options";
+  options.forEach((opt,j)=>{
+    const lbl=document.createElement("label");
+    lbl.className="opt";
+    const cb=document.createElement("input");
+    cb.type="checkbox";
+    const key = `${i}_${j}`;
+    cb.checked = savedData[key] || false;
+    cb.addEventListener("change",()=> {
+      savedData[key] = cb.checked;
+      localStorage.setItem("data",JSON.stringify(savedData));
+    });
+    lbl.appendChild(cb);
+    lbl.appendChild(document.createTextNode(opt));
+    optContainer.appendChild(lbl);
+  });
+  card.appendChild(optContainer);
+
+  const ta=document.createElement("textarea");
+  ta.placeholder="Not ekle...";
+  const noteKey = `note_${i}`;
+  ta.value = savedData[noteKey] || "";
+  ta.addEventListener("input",()=>{
+    savedData[noteKey] = ta.value;
+    localStorage.setItem("data",JSON.stringify(savedData));
+  });
+  card.appendChild(ta);
+
+  container.appendChild(card);
+});
+</script>
+
+</body>
+</html>
