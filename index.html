@@ -20,9 +20,9 @@ button:hover{background:#0056b3}
 #rapor th,#rapor td{border:1px solid #ccc;padding:8px;text-align:left;font-size:14px}
 #rapor th{background:#f5f5f5}
 #showBtn{position:fixed;bottom:15px;right:15px;display:none;z-index:999;}
-#eksikKutuContainer, #tamamKutuContainer{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
+#raporButtons{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
 .eksikKutu, .tamamKutu{border:1px solid #007bff;padding:10px;border-radius:5px;background:#e6f0ff;flex:1;min-width:150px;cursor:pointer;text-align:center}
-@media(max-width:600px){#buttons{flex-direction:column;} .options{flex-direction:column} #eksikKutuContainer, #tamamKutuContainer{flex-direction:column}}
+@media(max-width:600px){#buttons{flex-direction:column;} .options{flex-direction:column} #raporButtons{flex-direction:column}}
 </style>
 </head>
 <body>
@@ -41,7 +41,10 @@ button:hover{background:#0056b3}
 
 <button id="showBtn">Tuşları Göster</button>
 
-<div id="rapor"></div>
+<div id="rapor">
+  <div id="raporButtons"></div>
+  <div id="raporTables"></div>
+</div>
 <div id="list"></div>
 
 <script>
@@ -56,6 +59,8 @@ const names = [
 const options = ["Sabit 1","Sabit 2","Hareketli 1","Hareketli 2"];
 const container = document.getElementById("list");
 const raporDiv = document.getElementById("rapor");
+const raporTablesDiv = document.getElementById("raporTables");
+const raporButtonsDiv = document.getElementById("raporButtons");
 const buttonsDiv = document.getElementById("buttons");
 const showBtn = document.getElementById("showBtn");
 const savedData = JSON.parse(localStorage.getItem("data") || "{}");
@@ -119,18 +124,27 @@ function generateTable(type){
   return html;
 }
 
-// Eksikler ve tamamlananlar kutucukları toggle
+// Dinamik kutucuk event delegation
+raporButtonsDiv.addEventListener("click",function(e){
+  const el = e.target;
+  if(el.classList.contains("eksikKutu")) toggleEksikKutu(el.dataset.type);
+  if(el.classList.contains("tamamKutu")) toggleTamamKutu(el.dataset.type);
+});
+
+// Toggle fonksiyonları
 function toggleEksikKutu(type){
   const existing = document.getElementById('table_'+type.replace(/\s/g,''));
   if(existing){ existing.remove(); return; }
-  const tbl = document.createElement('div'); tbl.id = 'table_'+type.replace(/\s/g,''); tbl.innerHTML = `<h3>${type}</h3>`+generateTable(type);
-  raporDiv.appendChild(tbl); raporDiv.style.display='block';
+  const tbl = document.createElement('div'); tbl.id = 'table_'+type.replace(/\s/g,''); tbl.innerHTML = generateTable(type);
+  raporTablesDiv.appendChild(tbl);
+  raporDiv.style.display='block';
 }
 function toggleTamamKutu(type){
   const existing = document.getElementById('table_'+type.replace(/\s/g,''));
   if(existing){ existing.remove(); return; }
-  const tbl = document.createElement('div'); tbl.id = 'table_'+type.replace(/\s/g,''); tbl.innerHTML = `<h3>${type}</h3>`+generateTable(type);
-  raporDiv.appendChild(tbl); raporDiv.style.display='block';
+  const tbl = document.createElement('div'); tbl.id = 'table_'+type.replace(/\s/g,''); tbl.innerHTML = generateTable(type);
+  raporTablesDiv.appendChild(tbl);
+  raporDiv.style.display='block';
 }
 
 let raporVisible=false;
@@ -138,12 +152,11 @@ let raporVisible=false;
 // Eksikler butonu
 document.getElementById("eksikBtn").addEventListener("click",()=>{
   if(raporVisible && raporDiv.dataset.type === "eksik"){raporDiv.style.display="none";raporVisible=false; return;}
-  raporDiv.innerHTML = `
-    <div id="eksikKutuContainer">
-      <div class="eksikKutu" onclick="toggleEksikKutu('Sabit Eksikler')">Sabit Eksikler</div>
-      <div class="eksikKutu" onclick="toggleEksikKutu('Hareketli Eksikler')">Hareketli Eksikler</div>
-      <div class="eksikKutu" onclick="toggleEksikKutu('Toplam Eksikler')">Toplam Eksikler</div>
-    </div>`;
+  raporTablesDiv.innerHTML = "";
+  raporButtonsDiv.innerHTML = `
+      <div class="eksikKutu" data-type="Sabit Eksikler">Sabit Eksikler</div>
+      <div class="eksikKutu" data-type="Hareketli Eksikler">Hareketli Eksikler</div>
+      <div class="eksikKutu" data-type="Toplam Eksikler">Toplam Eksikler</div>`;
   raporDiv.style.display="block";
   raporDiv.dataset.type="eksik";
   raporVisible=true;
@@ -152,12 +165,11 @@ document.getElementById("eksikBtn").addEventListener("click",()=>{
 // Tamamlananlar butonu
 document.getElementById("tamamBtn").addEventListener("click",()=>{
   if(raporVisible && raporDiv.dataset.type === "tamam"){raporDiv.style.display="none";raporVisible=false; return;}
-  raporDiv.innerHTML = `
-    <div id="tamamKutuContainer">
-      <div class="tamamKutu" onclick="toggleTamamKutu('Sabit Tamamlananlar')">Sabit Tamamlananlar</div>
-      <div class="tamamKutu" onclick="toggleTamamKutu('Hareketli Tamamlananlar')">Hareketli Tamamlananlar</div>
-      <div class="tamamKutu" onclick="toggleTamamKutu('Toplam Tamamlananlar')">Toplam Tamamlananlar</div>
-    </div>`;
+  raporTablesDiv.innerHTML = "";
+  raporButtonsDiv.innerHTML = `
+      <div class="tamamKutu" data-type="Sabit Tamamlananlar">Sabit Tamamlananlar</div>
+      <div class="tamamKutu" data-type="Hareketli Tamamlananlar">Hareketli Tamamlananlar</div>
+      <div class="tamamKutu" data-type="Toplam Tamamlananlar">Toplam Tamamlananlar</div>`;
   raporDiv.style.display="block";
   raporDiv.dataset.type="tamam";
   raporVisible=true;
@@ -165,18 +177,23 @@ document.getElementById("tamamBtn").addEventListener("click",()=>{
 
 // Tüm tablolar
 document.getElementById("hepsiBtn").addEventListener("click",()=>{
-  if(raporVisible && raporDiv.dataset.type === "hepsi"){raporDiv.style.display="none";raporVisible=false; return;}
-  raporDiv.innerHTML = generateTable("Sabit Eksikler") + generateTable("Hareketli Eksikler") + generateTable("Toplam Eksikler") + generateTable("Sabit Tamamlananlar") + generateTable("Hareketli Tamamlananlar") + generateTable("Toplam Tamamlananlar");
+  if(raporVisible && raporDiv.dataset.type === "hepsi"){ 
+      raporDiv.style.display="none"; 
+      raporVisible=false; 
+      return;
+  }
+  raporTablesDiv.innerHTML = generateTable("Toplam Eksikler") + generateTable("Toplam Tamamlananlar");
+  raporButtonsDiv.innerHTML = "";
   raporDiv.style.display="block";
   raporDiv.dataset.type="hepsi";
   raporVisible=true;
 });
 
-// Kopyala
+// Kopyala sadece tablo
 document.getElementById("copyBtn").addEventListener("click",()=>{
   if(!raporVisible) return alert("Önce bir tablo açın!");
   const range = document.createRange();
-  range.selectNode(raporDiv);
+  range.selectNode(raporTablesDiv);
   const sel = window.getSelection();
   sel.removeAllRanges();
   sel.addRange(range);
@@ -190,7 +207,7 @@ document.getElementById("printBtn").addEventListener("click",()=>{
   if(!raporVisible) return alert("Önce bir tablo açın!");
   const printWindow = window.open('', '', 'height=600,width=800');
   printWindow.document.write('<html><head><title>Tablo Yazdır</title></head><body>');
-  printWindow.document.write(raporDiv.innerHTML);
+  printWindow.document.write(raporTablesDiv.innerHTML);
   printWindow.document.write('</body></html>');
   printWindow.document.close();
   printWindow.print();
@@ -217,11 +234,11 @@ document.getElementById("toggleView").addEventListener("click",()=>{
 
 // Tuşları gizle/göster
 document.getElementById("hideButtonsBtn").addEventListener("click",()=>{
-  buttonsDiv.style.display="none";
+  document.querySelectorAll("#buttons,#raporButtons").forEach(el=>{if(el) el.style.display="none"});
   showBtn.style.display="block";
 });
 showBtn.addEventListener("click",()=>{
-  buttonsDiv.style.display="flex";
+  document.querySelectorAll("#buttons,#raporButtons").forEach(el=>{if(el) el.style.display="flex"});
   showBtn.style.display="none";
 });
 </script>
