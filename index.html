@@ -5,23 +5,57 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Protez Kota Listesi</title>
 <style>
-body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:15px;background:#fafafa}
-.card{border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:15px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.name{font-weight:600;margin-bottom:8px;font-size:16px;color:#333;min-width:150px}
-.options{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px}
+body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:15px;background:#f5f5f5}
+.card{
+  border:1px solid #ddd;
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:12px;
+  background:#fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s ease;
+  display:flex;
+  flex-direction:column;
+  flex-wrap:nowrap;
+}
+.card:hover{
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.name{font-weight:600;margin-bottom:6px;font-size:16px;color:#333;min-width:150px}
+.options{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px}
 .opt{display:flex;align-items:center;gap:5px}
-input[type="checkbox"]{width:20px;height:20px}
-textarea{width:100%;padding:8px;font-size:14px;border:1px solid #ccc;border-radius:4px;resize:vertical;min-height:40px}
-button{padding:10px 20px;font-size:16px;border:none;border-radius:5px;background:#007bff;color:white;cursor:pointer;margin:5px}
+input[type="checkbox"]{width:18px;height:18px}
+textarea{
+  width:100%;
+  padding:6px 8px;
+  font-size:13px;
+  border:1px solid #ccc;
+  border-radius:6px;
+  resize:vertical;
+  min-height:35px;
+  max-height:80px;
+  flex:1 1 auto;
+  min-width:120px;
+  max-width:300px;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+textarea:focus{
+  border-color:#007bff;
+  box-shadow: 0 0 5px rgba(0,123,255,0.3);
+  outline:none;
+}
+button{padding:10px 18px;font-size:15px;border:none;border-radius:5px;background:#007bff;color:white;cursor:pointer;margin:4px;transition:all 0.2s ease;}
 button:hover{background:#0056b3}
-#buttons{margin-bottom:15px; display:flex; flex-wrap:wrap; gap:5px;}
+#buttons{margin-bottom:12px; display:flex; flex-wrap:wrap; gap:5px;}
 #rapor{border:1px solid #ddd;background:#fff;padding:10px;margin-top:15px;overflow-x:auto;display:none}
-#rapor table{width:100%;border-collapse:collapse;margin-bottom:15px}
+#rapor table{width:100%;border-collapse:collapse;margin-bottom:12px}
 #rapor th,#rapor td{border:1px solid #ccc;padding:8px;text-align:left;font-size:14px}
 #rapor th{background:#f5f5f5}
 #showBtn{position:fixed;bottom:15px;right:15px;display:none;z-index:999;}
 #raporButtons{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
-.eksikKutu, .tamamKutu{border:1px solid #007bff;padding:10px;border-radius:5px;background:#e6f0ff;flex:1;min-width:150px;cursor:pointer;text-align:center}
+.eksikKutu, .tamamKutu{border:1px solid #007bff;padding:8px;border-radius:5px;background:#e6f0ff;flex:1;min-width:130px;cursor:pointer;text-align:center;transition:all 0.2s ease}
+.eksikKutu:hover, .tamamKutu:hover{background:#d0e4ff}
 @media(max-width:600px){#buttons{flex-direction:column;} .options{flex-direction:column} #raporButtons{flex-direction:column}}
 </style>
 </head>
@@ -61,7 +95,6 @@ const container = document.getElementById("list");
 const raporDiv = document.getElementById("rapor");
 const raporTablesDiv = document.getElementById("raporTables");
 const raporButtonsDiv = document.getElementById("raporButtons");
-const buttonsDiv = document.getElementById("buttons");
 const showBtn = document.getElementById("showBtn");
 const savedData = JSON.parse(localStorage.getItem("data") || "{}");
 
@@ -175,7 +208,7 @@ document.getElementById("tamamBtn").addEventListener("click",()=>{
   raporVisible=true;
 });
 
-// Tüm tablolar
+// Tüm tablolar toggle
 document.getElementById("hepsiBtn").addEventListener("click",()=>{
   if(raporVisible && raporDiv.dataset.type === "hepsi"){ 
       raporDiv.style.display="none"; 
@@ -221,7 +254,7 @@ document.getElementById("toggleView").addEventListener("click",()=>{
     if(desktopMode){
       card.style.display="flex";
       card.style.alignItems="center";
-      card.style.flexWrap="nowrap"; 
+      card.style.flexWrap="wrap"; 
       card.querySelector(".options").style.flexDirection="row";
       card.querySelector("textarea").style.width="200px";
     }else{
