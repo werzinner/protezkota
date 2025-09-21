@@ -119,21 +119,18 @@ function generateTable(type){
   return html;
 }
 
-// Global fonksiyonlar
+// Eksikler ve tamamlananlar kutucukları toggle
 function toggleEksikKutu(type){
   const existing = document.getElementById('table_'+type.replace(/\s/g,''));
   if(existing){ existing.remove(); return; }
   const tbl = document.createElement('div'); tbl.id = 'table_'+type.replace(/\s/g,''); tbl.innerHTML = `<h3>${type}</h3>`+generateTable(type);
-  raporDiv.appendChild(tbl);
-  raporDiv.style.display='block';
+  raporDiv.appendChild(tbl); raporDiv.style.display='block';
 }
-
 function toggleTamamKutu(type){
   const existing = document.getElementById('table_'+type.replace(/\s/g,''));
   if(existing){ existing.remove(); return; }
   const tbl = document.createElement('div'); tbl.id = 'table_'+type.replace(/\s/g,''); tbl.innerHTML = `<h3>${type}</h3>`+generateTable(type);
-  raporDiv.appendChild(tbl);
-  raporDiv.style.display='block';
+  raporDiv.appendChild(tbl); raporDiv.style.display='block';
 }
 
 let raporVisible=false;
@@ -166,8 +163,67 @@ document.getElementById("tamamBtn").addEventListener("click",()=>{
   raporVisible=true;
 });
 
-// Diğer butonlar ve masaüstü modu, yazdır, kopyala, tuşları gizle/göster önceki kodla aynı
-// ... (önceki scriptten kopyalanabilir)
+// Tüm tablolar
+document.getElementById("hepsiBtn").addEventListener("click",()=>{
+  if(raporVisible && raporDiv.dataset.type === "hepsi"){raporDiv.style.display="none";raporVisible=false; return;}
+  raporDiv.innerHTML = generateTable("Sabit Eksikler") + generateTable("Hareketli Eksikler") + generateTable("Toplam Eksikler") + generateTable("Sabit Tamamlananlar") + generateTable("Hareketli Tamamlananlar") + generateTable("Toplam Tamamlananlar");
+  raporDiv.style.display="block";
+  raporDiv.dataset.type="hepsi";
+  raporVisible=true;
+});
+
+// Kopyala
+document.getElementById("copyBtn").addEventListener("click",()=>{
+  if(!raporVisible) return alert("Önce bir tablo açın!");
+  const range = document.createRange();
+  range.selectNode(raporDiv);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  document.execCommand('copy');
+  sel.removeAllRanges();
+  alert("Tablo kopyalandı ✅");
+});
+
+// Yazdır
+document.getElementById("printBtn").addEventListener("click",()=>{
+  if(!raporVisible) return alert("Önce bir tablo açın!");
+  const printWindow = window.open('', '', 'height=600,width=800');
+  printWindow.document.write('<html><head><title>Tablo Yazdır</title></head><body>');
+  printWindow.document.write(raporDiv.innerHTML);
+  printWindow.document.write('</body></html>');
+  printWindow.document.close();
+  printWindow.print();
+});
+
+// Masaüstü modu
+let desktopMode=false;
+document.getElementById("toggleView").addEventListener("click",()=>{
+  desktopMode=!desktopMode;
+  document.querySelectorAll(".card").forEach(card=>{
+    if(desktopMode){
+      card.style.display="flex";
+      card.style.alignItems="center";
+      card.style.flexWrap="nowrap"; 
+      card.querySelector(".options").style.flexDirection="row";
+      card.querySelector("textarea").style.width="200px";
+    }else{
+      card.style.display="block";
+      card.querySelector(".options").style.flexDirection="column";
+      card.querySelector("textarea").style.width="100%";
+    }
+  });
+});
+
+// Tuşları gizle/göster
+document.getElementById("hideButtonsBtn").addEventListener("click",()=>{
+  buttonsDiv.style.display="none";
+  showBtn.style.display="block";
+});
+showBtn.addEventListener("click",()=>{
+  buttonsDiv.style.display="flex";
+  showBtn.style.display="none";
+});
 </script>
 
 </body>
