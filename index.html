@@ -3,22 +3,43 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>İsimler - Sabit / Hareketli + Not</title>
+<title>Protez Kota Listesi</title>
 <style>
 body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:15px;background:#fafafa}
 .card{border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:15px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-.name{font-weight:600;margin-bottom:8px;font-size:16px;color:#333}
+.name{font-weight:600;margin-bottom:8px;font-size:16px;color:#333;min-width:150px}
 .options{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:8px}
 .opt{display:flex;align-items:center;gap:5px}
 input[type="checkbox"]{width:20px;height:20px}
 textarea{width:100%;padding:8px;font-size:14px;border:1px solid #ccc;border-radius:4px;resize:vertical;min-height:40px}
-@media(max-width:600px){.options{flex-direction:column;}}
+button{padding:10px 20px;font-size:16px;border:none;border-radius:5px;background:#007bff;color:white;cursor:pointer;margin:5px}
+button:hover{background:#0056b3}
+#buttons{margin-bottom:15px; display:flex; flex-wrap:wrap; gap:5px;}
+#rapor{border:1px solid #ddd;background:#fff;padding:10px;margin-top:15px;overflow-x:auto;display:none}
+#rapor table{width:100%;border-collapse:collapse;margin-bottom:15px}
+#rapor th,#rapor td{border:1px solid #ccc;padding:8px;text-align:left;font-size:14px}
+#rapor th{background:#f5f5f5}
+#showBtn{position:fixed;bottom:15px;right:15px;display:none;z-index:999;}
+@media(max-width:600px){#buttons{flex-direction:column;} .options{flex-direction:column;}}
 </style>
 </head>
 <body>
 
-<h2>İsimler — Sabit / Hareketli + Not</h2>
+<h2>Protez Kota Listesi</h2>
 
+<div id="buttons">
+  <button id="eksikBtn">Eksikler Tablosu</button>
+  <button id="tamamBtn">Tamamlananlar Tablosu</button>
+  <button id="hepsiBtn">Tüm Tablolar</button>
+  <button id="copyBtn">Tabloyu Kopyala</button>
+  <button id="printBtn">Tabloyu Yazdır</button>
+  <button id="toggleView">Masaüstü Modu</button>
+  <button id="hideButtonsBtn">Tuşları Gizle</button>
+</div>
+
+<button id="showBtn">Tuşları Göster</button>
+
+<div id="rapor"></div>
 <div id="list"></div>
 
 <script>
@@ -30,13 +51,14 @@ const names = [
   "BERKANT GİLİK","BERRAK ALTUNTAŞ","ATAKAN KAYA","SUEDA ŞAHİN",
   "ALEYNA SİDRET DEMİR","EREN SELİMLER"
 ];
-
 const options = ["Sabit 1","Sabit 2","Hareketli 1","Hareketli 2"];
 const container = document.getElementById("list");
-
-// Kaydedilmiş veriler
+const raporDiv = document.getElementById("rapor");
+const buttonsDiv = document.getElementById("buttons");
+const showBtn = document.getElementById("showBtn");
 const savedData = JSON.parse(localStorage.getItem("data") || "{}");
 
+// Kartları oluştur
 names.forEach((name,i)=>{
   const card=document.createElement("div");
   card.className="card";
@@ -76,6 +98,131 @@ names.forEach((name,i)=>{
   card.appendChild(ta);
 
   container.appendChild(card);
+});
+
+// Rapor tabloları
+function generateEksikTable(){
+  let html = "<h3>Eksikler</h3><table><tr><th>İsim</th><th>Eksikler</th></tr>";
+  names.forEach((name,i)=>{
+    let eksikler=[];
+    options.forEach((opt,j)=>{
+      const key = `${i}_${j}`;
+      if(!savedData[key]) eksikler.push(opt);
+    });
+    html += `<tr><td>${name}</td><td>${eksikler.join(", ")}</td></tr>`;
+  });
+  html += "</table>";
+  return html;
+}
+
+function generateTamamlananTable(){
+  let html = "<h3>Tamamlananlar</h3><table><tr><th>İsim</th><th>Tamamlananlar</th></tr>";
+  names.forEach((name,i)=>{
+    let tamamlanan=[];
+    options.forEach((opt,j)=>{
+      const key = `${i}_${j}`;
+      if(savedData[key]) tamamlanan.push(opt);
+    });
+    html += `<tr><td>${name}</td><td>${tamamlanan.join(", ")}</td></tr>`;
+  });
+  html += "</table>";
+  return html;
+}
+
+function generateAllTables(){
+  return generateEksikTable() + generateTamamlananTable();
+}
+
+// Toggle rapor visibility
+let raporVisible=false;
+document.getElementById("eksikBtn").addEventListener("click",()=>{
+  if(raporVisible && raporDiv.dataset.type === "eksik"){
+    raporDiv.style.display="none";
+    raporVisible=false;
+  } else {
+    raporDiv.innerHTML = generateEksikTable();
+    raporDiv.style.display="block";
+    raporDiv.dataset.type = "eksik";
+    raporVisible=true;
+  }
+});
+
+document.getElementById("tamamBtn").addEventListener("click",()=>{
+  if(raporVisible && raporDiv.dataset.type === "tamam"){
+    raporDiv.style.display="none";
+    raporVisible=false;
+  } else {
+    raporDiv.innerHTML = generateTamamlananTable();
+    raporDiv.style.display="block";
+    raporDiv.dataset.type = "tamam";
+    raporVisible=true;
+  }
+});
+
+document.getElementById("hepsiBtn").addEventListener("click",()=>{
+  if(raporVisible && raporDiv.dataset.type === "hepsi"){
+    raporDiv.style.display="none";
+    raporVisible=false;
+  } else {
+    raporDiv.innerHTML = generateAllTables();
+    raporDiv.style.display="block";
+    raporDiv.dataset.type = "hepsi";
+    raporVisible=true;
+  }
+});
+
+// Kopyala butonu
+document.getElementById("copyBtn").addEventListener("click",()=>{
+  if(!raporVisible) return alert("Önce bir tablo açın!");
+  const range = document.createRange();
+  range.selectNode(raporDiv);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  document.execCommand('copy');
+  sel.removeAllRanges();
+  alert("Tablo kopyalandı ✅");
+});
+
+// Yazdır butonu
+document.getElementById("printBtn").addEventListener("click",()=>{
+  if(!raporVisible) return alert("Önce bir tablo açın!");
+  const printWindow = window.open('', '', 'height=600,width=800');
+  printWindow.document.write('<html><head><title>Tablo Yazdır</title></head><body>');
+  printWindow.document.write(raporDiv.innerHTML);
+  printWindow.document.write('</body></html>');
+  printWindow.document.close();
+  printWindow.print();
+});
+
+// Masaüstü modu toggle
+let desktopMode=false;
+document.getElementById("toggleView").addEventListener("click",()=>{
+  desktopMode=!desktopMode;
+  document.querySelectorAll(".card").forEach(card=>{
+    if(desktopMode){
+      card.style.display="flex";
+      card.style.alignItems="center";
+      card.style.flexWrap="nowrap"; 
+      card.querySelector(".options").style.flexDirection="row";
+      card.querySelector("textarea").style.width="200px";
+    }else{
+      card.style.display="block";
+      card.querySelector(".options").style.flexDirection="column";
+      card.querySelector("textarea").style.width="100%";
+    }
+  });
+});
+
+// Tuşları gizle/göster
+document.getElementById("hideButtonsBtn").addEventListener("click",()=>{
+  buttonsDiv.style.display="none";
+  showBtn.style.display="block";
+});
+
+showBtn.addEventListener("click",()=>{
+  buttonsDiv.style.display="flex";
+  showBtn.style.display="none";
 });
 </script>
 
