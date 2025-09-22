@@ -6,57 +6,67 @@
 <title>Protez Kota Listesi</title>
 <style>
 body{font-family:system-ui,Segoe UI,Roboto,Arial;margin:15px;background:#f5f5f5}
+
+/* Kart tasarımı */
 .card{
-  border:1px solid #ddd;
-  border-radius:10px;
-  padding:10px;
-  margin-bottom:12px;
+  border:1px solid #e0e0e0;
+  border-radius:12px;
+  padding:14px;
+  margin-bottom:14px;
   background:#fff;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  transition: box-shadow 0.2s ease;
-  display:flex;
-  flex-direction:column;
-  flex-wrap:nowrap;
+  box-shadow:0 4px 10px rgba(0,0,0,0.06);
+  transition:all 0.25s ease;
 }
-.card:hover{
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,0,0,0.12)}
+
+.name{font-weight:600;font-size:16px;color:#222;margin-bottom:8px}
+
+.options{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:8px}
+.opt{display:flex;align-items:center;gap:6px;font-size:14px;color:#333}
+
+/* Checkbox stil */
+input[type="checkbox"]{
+  width:18px;height:18px;
+  accent-color:#007bff;
+  border-radius:5px;
+  cursor:pointer;
 }
-.name{font-weight:600;margin-bottom:6px;font-size:16px;color:#333;min-width:150px}
-.options{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px}
-.opt{display:flex;align-items:center;gap:5px}
-input[type="checkbox"]{width:18px;height:18px}
+
+/* Not kutusu küçültülmüş */
 textarea{
   width:100%;
   padding:6px 8px;
   font-size:13px;
   border:1px solid #ccc;
-  border-radius:6px;
+  border-radius:8px;
   resize:vertical;
-  min-height:35px;
+  min-height:30px;
   max-height:80px;
-  flex:1 1 auto;
-  min-width:120px;
-  max-width:300px;
-  transition: all 0.2s ease;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  background:#fafafa;
+  transition:border 0.2s, box-shadow 0.2s, background 0.2s;
 }
 textarea:focus{
   border-color:#007bff;
-  box-shadow: 0 0 5px rgba(0,123,255,0.3);
+  box-shadow:0 0 5px rgba(0,123,255,0.25);
   outline:none;
+  background:#fff;
 }
-button{padding:10px 18px;font-size:15px;border:none;border-radius:5px;background:#007bff;color:white;cursor:pointer;margin:4px;transition:all 0.2s ease;}
+
+/* Genel butonlar */
+button{padding:8px 14px;font-size:14px;border:none;border-radius:6px;background:#007bff;color:#fff;cursor:pointer;margin:3px;transition:.2s}
 button:hover{background:#0056b3}
-#buttons{margin-bottom:12px; display:flex; flex-wrap:wrap; gap:5px;}
-#rapor{border:1px solid #ddd;background:#fff;padding:10px;margin-top:15px;overflow-x:auto;display:none}
+
+#buttons{margin-bottom:12px;display:flex;flex-wrap:wrap;gap:6px}
+#rapor{border:1px solid #ddd;background:#fff;padding:10px;margin-top:15px;overflow-x:auto;display:none;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.05)}
 #rapor table{width:100%;border-collapse:collapse;margin-bottom:12px}
-#rapor th,#rapor td{border:1px solid #ccc;padding:8px;text-align:left;font-size:14px}
+#rapor th,#rapor td{border:1px solid #ccc;padding:6px;text-align:left;font-size:13px}
 #rapor th{background:#f5f5f5}
 #showBtn{position:fixed;bottom:15px;right:15px;display:none;z-index:999;}
 #raporButtons{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px}
-.eksikKutu, .tamamKutu{border:1px solid #007bff;padding:8px;border-radius:5px;background:#e6f0ff;flex:1;min-width:130px;cursor:pointer;text-align:center;transition:all 0.2s ease}
-.eksikKutu:hover, .tamamKutu:hover{background:#d0e4ff}
-@media(max-width:600px){#buttons{flex-direction:column;} .options{flex-direction:column} #raporButtons{flex-direction:column}}
+.eksikKutu,.tamamKutu{border:1px solid #007bff;padding:8px;border-radius:6px;background:#e6f0ff;flex:1;min-width:130px;cursor:pointer;text-align:center;transition:.2s}
+.eksikKutu:hover,.tamamKutu:hover{background:#d0e4ff}
+.kuraCard{border:1px solid #ccc;padding:8px;border-radius:8px;margin:4px;background:#fafafa}
+.kuraList{display:flex;flex-wrap:wrap;gap:10px}
 </style>
 </head>
 <body>
@@ -67,9 +77,11 @@ button:hover{background:#0056b3}
   <button id="eksikBtn">Eksikler Tablosu</button>
   <button id="tamamBtn">Tamamlananlar Tablosu</button>
   <button id="hepsiBtn">Tüm Tablolar</button>
+  <button id="closeAllBtn">Tümünü Kapat</button>
   <button id="copyBtn">Tabloyu Kopyala</button>
   <button id="printBtn">Tabloyu Yazdır</button>
   <button id="toggleView">Masaüstü Modu</button>
+  <button id="kuraBtn">Kura Çekme Modu</button>
   <button id="hideButtonsBtn">Tuşları Gizle</button>
 </div>
 
@@ -82,199 +94,160 @@ button:hover{background:#0056b3}
 <div id="list"></div>
 
 <script>
-const names = [
-  "CENNET YILDIZ","NİDA NUR SOLAK","SIMGE DÜZEN","AHMET KALAYCI",
-  "PELIN BALKESEN","MUHAMMED EREN AKTAŞ","ECE KELEŞ","MEHMET BARAN BIRLIK",
-  "SÜMEYRA KAVAS","FATMA ZEHRA YAŞAR","ABDULLAH YÜZER","NISA KAYA",
-  "MÜMÜNE ÖZCAN","DUYGUNUR ERDOĞDU","EFE OKYAR","ÇİĞDEM SAKINCI",
-  "BERKANT GİLİK","BERRAK ALTUNTAŞ","ATAKAN KAYA","SUEDA ŞAHİN",
-  "ALEYNA SİDRET DEMİR","EREN SELİMLER"
-];
-const options = ["Sabit 1","Sabit 2","Hareketli 1","Hareketli 2"];
-const container = document.getElementById("list");
-const raporDiv = document.getElementById("rapor");
-const raporTablesDiv = document.getElementById("raporTables");
-const raporButtonsDiv = document.getElementById("raporButtons");
-const showBtn = document.getElementById("showBtn");
-const savedData = JSON.parse(localStorage.getItem("data") || "{}");
+const names=["CENNET YILDIZ","NİDA NUR SOLAK","SIMGE DÜZEN","AHMET KALAYCI","PELIN BALKESEN","MUHAMMED EREN AKTAŞ","ECE KELEŞ","MEHMET BARAN BIRLIK","SÜMEYRA KAVAS","FATMA ZEHRA YAŞAR","ABDULLAH YÜZER","NISA KAYA","MÜMÜNE ÖZCAN","DUYGUNUR ERDOĞDU","EFE OKYAR","ÇİĞDEM SAKINCI","BERKANT GİLİK","BERRAK ALTUNTAŞ","ATAKAN KAYA","SUEDA ŞAHİN","ALEYNA SİDRET DEMİR","EREN SELİMLER"];
+const options=["Sabit 1","Sabit 2","Hareketli 1","Hareketli 2"];
+const container=document.getElementById("list");
+const raporDiv=document.getElementById("rapor");
+const raporTablesDiv=document.getElementById("raporTables");
+const raporButtonsDiv=document.getElementById("raporButtons");
+const showBtn=document.getElementById("showBtn");
+const savedData=JSON.parse(localStorage.getItem("data")||"{}");
 
-// Kartları oluştur
+// Kart oluştur
 names.forEach((name,i)=>{
   const card=document.createElement("div");
   card.className="card";
-
-  const title=document.createElement("div");
-  title.className="name";
-  title.textContent=name;
-  card.appendChild(title);
-
-  const optContainer=document.createElement("div");
-  optContainer.className="options";
+  card.innerHTML=`<div class="name">${name}</div>`;
+  const optC=document.createElement("div");
+  optC.className="options";
   options.forEach((opt,j)=>{
-    const lbl=document.createElement("label");
-    lbl.className="opt";
-    const cb=document.createElement("input");
-    cb.type="checkbox";
-    const key = `${i}_${j}`;
-    cb.checked = savedData[key] || false;
-    cb.addEventListener("change",()=> {
-      savedData[key] = cb.checked;
-      localStorage.setItem("data",JSON.stringify(savedData));
-    });
-    lbl.appendChild(cb);
-    lbl.appendChild(document.createTextNode(opt));
-    optContainer.appendChild(lbl);
+    const lbl=document.createElement("label");lbl.className="opt";
+    const cb=document.createElement("input");cb.type="checkbox";
+    const key=`${i}_${j}`;cb.checked=savedData[key]||false;
+    cb.addEventListener("change",()=>{savedData[key]=cb.checked;localStorage.setItem("data",JSON.stringify(savedData))});
+    lbl.appendChild(cb);lbl.appendChild(document.createTextNode(opt));optC.appendChild(lbl);
   });
-  card.appendChild(optContainer);
-
+  card.appendChild(optC);
   const ta=document.createElement("textarea");
+  const noteKey=`note_${i}`;ta.value=savedData[noteKey]||"";
   ta.placeholder="Not ekle...";
-  const noteKey = `note_${i}`;
-  ta.value = savedData[noteKey] || "";
-  ta.addEventListener("input",()=>{
-    savedData[noteKey] = ta.value;
-    localStorage.setItem("data",JSON.stringify(savedData));
-  });
+  ta.addEventListener("input",()=>{savedData[noteKey]=ta.value;localStorage.setItem("data",JSON.stringify(savedData))});
   card.appendChild(ta);
-
   container.appendChild(card);
 });
 
-// Tablo üretme fonksiyonu
+// tablo üret
 function generateTable(type){
-  let html = `<table><tr><th>İsim</th><th>${type}</th></tr>`;
+  let html=`<table><tr><th>İsim</th><th>${type}</th></tr>`;
   names.forEach((name,i)=>{
-    let items = [];
-    if(type==="Sabit Eksikler"){[0,1].forEach(j=>{if(!savedData[`${i}_${j}`]) items.push(options[j])})}
-    else if(type==="Hareketli Eksikler"){[2,3].forEach(j=>{if(!savedData[`${i}_${j}`]) items.push(options[j])})}
-    else if(type==="Toplam Eksikler"){[0,1,2,3].forEach(j=>{if(!savedData[`${i}_${j}`]) items.push(options[j])})}
-    else if(type==="Sabit Tamamlananlar"){[0,1].forEach(j=>{if(savedData[`${i}_${j}`]) items.push(options[j])})}
-    else if(type==="Hareketli Tamamlananlar"){[2,3].forEach(j=>{if(savedData[`${i}_${j}`]) items.push(options[j])})}
-    else if(type==="Toplam Tamamlananlar"){[0,1,2,3].forEach(j=>{if(savedData[`${i}_${j}`]) items.push(options[j])})}
-    html += `<tr><td>${name}</td><td>${items.join(", ")}</td></tr>`;
+    let items=[];
+    if(type==="Sabit Eksikler"){[0,1].forEach(j=>{if(!savedData[`${i}_${j}`])items.push(options[j])})}
+    else if(type==="Hareketli Eksikler"){[2,3].forEach(j=>{if(!savedData[`${i}_${j}`])items.push(options[j])})}
+    else if(type==="Toplam Eksikler"){[0,1,2,3].forEach(j=>{if(!savedData[`${i}_${j}`])items.push(options[j])})}
+    else if(type==="Sabit Tamamlananlar"){[0,1].forEach(j=>{if(savedData[`${i}_${j}`])items.push(options[j])})}
+    else if(type==="Hareketli Tamamlananlar"){[2,3].forEach(j=>{if(savedData[`${i}_${j}`])items.push(options[j])})}
+    else if(type==="Toplam Tamamlananlar"){[0,1,2,3].forEach(j=>{if(savedData[`${i}_${j}`])items.push(options[j])})}
+    html+=`<tr><td>${name}</td><td>${items.join(", ")}</td></tr>`;
   });
-  html += "</table>";
-  return html;
+  html+="</table>";return html;
 }
 
-// Dinamik kutucuk event delegation
-raporButtonsDiv.addEventListener("click",function(e){
-  const el = e.target;
-  if(el.classList.contains("eksikKutu")) toggleEksikKutu(el.dataset.type);
-  if(el.classList.contains("tamamKutu")) toggleTamamKutu(el.dataset.type);
+// toggle kutular
+raporButtonsDiv.addEventListener("click",e=>{
+  const el=e.target;
+  if(el.classList.contains("eksikKutu"))toggleKutu(el.dataset.type);
+  if(el.classList.contains("tamamKutu"))toggleKutu(el.dataset.type);
 });
-
-// Toggle fonksiyonları
-function toggleEksikKutu(type){
-  const existing = document.getElementById('table_'+type.replace(/\s/g,''));
-  if(existing){ existing.remove(); return; }
-  const tbl = document.createElement('div'); tbl.id = 'table_'+type.replace(/\s/g,''); tbl.innerHTML = generateTable(type);
-  raporTablesDiv.appendChild(tbl);
-  raporDiv.style.display='block';
-}
-function toggleTamamKutu(type){
-  const existing = document.getElementById('table_'+type.replace(/\s/g,''));
-  if(existing){ existing.remove(); return; }
-  const tbl = document.createElement('div'); tbl.id = 'table_'+type.replace(/\s/g,''); tbl.innerHTML = generateTable(type);
-  raporTablesDiv.appendChild(tbl);
-  raporDiv.style.display='block';
+function toggleKutu(type){
+  const id='table_'+type.replace(/\s/g,'');
+  const ex=document.getElementById(id);
+  if(ex){ex.remove();return;}
+  const tbl=document.createElement('div');tbl.id=id;tbl.innerHTML=generateTable(type);
+  raporTablesDiv.appendChild(tbl);raporDiv.style.display='block';
 }
 
+// global flag
 let raporVisible=false;
 
-// Eksikler butonu
+// butonlar
 document.getElementById("eksikBtn").addEventListener("click",()=>{
-  if(raporVisible && raporDiv.dataset.type === "eksik"){raporDiv.style.display="none";raporVisible=false; return;}
-  raporTablesDiv.innerHTML = "";
-  raporButtonsDiv.innerHTML = `
-      <div class="eksikKutu" data-type="Sabit Eksikler">Sabit Eksikler</div>
-      <div class="eksikKutu" data-type="Hareketli Eksikler">Hareketli Eksikler</div>
-      <div class="eksikKutu" data-type="Toplam Eksikler">Toplam Eksikler</div>`;
-  raporDiv.style.display="block";
-  raporDiv.dataset.type="eksik";
-  raporVisible=true;
+  if(raporVisible&&raporDiv.dataset.type==="eksik"){raporDiv.style.display="none";raporVisible=false;return;}
+  raporTablesDiv.innerHTML="";raporButtonsDiv.innerHTML=`
+    <div class="eksikKutu" data-type="Sabit Eksikler">Sabit Eksikler</div>
+    <div class="eksikKutu" data-type="Hareketli Eksikler">Hareketli Eksikler</div>
+    <div class="eksikKutu" data-type="Toplam Eksikler">Toplam Eksikler</div>`;
+  raporDiv.style.display="block";raporDiv.dataset.type="eksik";raporVisible=true;
 });
-
-// Tamamlananlar butonu
 document.getElementById("tamamBtn").addEventListener("click",()=>{
-  if(raporVisible && raporDiv.dataset.type === "tamam"){raporDiv.style.display="none";raporVisible=false; return;}
-  raporTablesDiv.innerHTML = "";
-  raporButtonsDiv.innerHTML = `
-      <div class="tamamKutu" data-type="Sabit Tamamlananlar">Sabit Tamamlananlar</div>
-      <div class="tamamKutu" data-type="Hareketli Tamamlananlar">Hareketli Tamamlananlar</div>
-      <div class="tamamKutu" data-type="Toplam Tamamlananlar">Toplam Tamamlananlar</div>`;
-  raporDiv.style.display="block";
-  raporDiv.dataset.type="tamam";
-  raporVisible=true;
+  if(raporVisible&&raporDiv.dataset.type==="tamam"){raporDiv.style.display="none";raporVisible=false;return;}
+  raporTablesDiv.innerHTML="";raporButtonsDiv.innerHTML=`
+    <div class="tamamKutu" data-type="Sabit Tamamlananlar">Sabit Tamamlananlar</div>
+    <div class="tamamKutu" data-type="Hareketli Tamamlananlar">Hareketli Tamamlananlar</div>
+    <div class="tamamKutu" data-type="Toplam Tamamlananlar">Toplam Tamamlananlar</div>`;
+  raporDiv.style.display="block";raporDiv.dataset.type="tamam";raporVisible=true;
 });
-
-// Tüm tablolar toggle
 document.getElementById("hepsiBtn").addEventListener("click",()=>{
-  if(raporVisible && raporDiv.dataset.type === "hepsi"){ 
-      raporDiv.style.display="none"; 
-      raporVisible=false; 
-      return;
-  }
-  raporTablesDiv.innerHTML = generateTable("Toplam Eksikler") + generateTable("Toplam Tamamlananlar");
-  raporButtonsDiv.innerHTML = "";
-  raporDiv.style.display="block";
-  raporDiv.dataset.type="hepsi";
-  raporVisible=true;
+  if(raporVisible&&raporDiv.dataset.type==="hepsi"){raporDiv.style.display="none";raporVisible=false;return;}
+  raporTablesDiv.innerHTML=generateTable("Toplam Eksikler")+generateTable("Toplam Tamamlananlar");
+  raporButtonsDiv.innerHTML="";raporDiv.style.display="block";raporDiv.dataset.type="hepsi";raporVisible=true;
+});
+document.getElementById("closeAllBtn").addEventListener("click",()=>{
+  raporTablesDiv.innerHTML="";raporButtonsDiv.innerHTML="";raporDiv.style.display="none";raporVisible=false;
 });
 
-// Kopyala sadece tablo
+// kopya
 document.getElementById("copyBtn").addEventListener("click",()=>{
-  if(!raporVisible) return alert("Önce bir tablo açın!");
-  const range = document.createRange();
-  range.selectNode(raporTablesDiv);
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
-  document.execCommand('copy');
-  sel.removeAllRanges();
-  alert("Tablo kopyalandı ✅");
+  if(!raporVisible)return alert("Önce tablo aç!");
+  const range=document.createRange();range.selectNode(raporTablesDiv);
+  const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+  document.execCommand('copy');sel.removeAllRanges();alert("Tablo kopyalandı ✅");
 });
-
-// Yazdır
+// yazdır
 document.getElementById("printBtn").addEventListener("click",()=>{
-  if(!raporVisible) return alert("Önce bir tablo açın!");
-  const printWindow = window.open('', '', 'height=600,width=800');
-  printWindow.document.write('<html><head><title>Tablo Yazdır</title></head><body>');
-  printWindow.document.write(raporTablesDiv.innerHTML);
-  printWindow.document.write('</body></html>');
-  printWindow.document.close();
-  printWindow.print();
+  if(!raporVisible)return alert("Önce tablo aç!");
+  const w=window.open('','','height=600,width=800');
+  w.document.write('<html><head><title>Yazdır</title></head><body>'+raporTablesDiv.innerHTML+'</body></html>');
+  w.document.close();w.print();
 });
 
-// Masaüstü modu
+// masaüstü modu
 let desktopMode=false;
 document.getElementById("toggleView").addEventListener("click",()=>{
   desktopMode=!desktopMode;
   document.querySelectorAll(".card").forEach(card=>{
-    if(desktopMode){
-      card.style.display="flex";
-      card.style.alignItems="center";
-      card.style.flexWrap="wrap"; 
-      card.querySelector(".options").style.flexDirection="row";
-      card.querySelector("textarea").style.width="200px";
-    }else{
-      card.style.display="block";
-      card.querySelector(".options").style.flexDirection="column";
-      card.querySelector("textarea").style.width="100%";
-    }
+    if(desktopMode){card.style.display="flex";card.style.alignItems="center";card.querySelector(".options").style.flexDirection="row";card.querySelector("textarea").style.width="200px"}
+    else{card.style.display="block";card.querySelector(".options").style.flexDirection="column";card.querySelector("textarea").style.width="100%"}
   });
 });
 
-// Tuşları gizle/göster
+// kura modu toggle
+document.getElementById("kuraBtn").addEventListener("click",()=>{
+  if(raporVisible&&raporDiv.dataset.type==="kura"){raporDiv.style.display="none";raporVisible=false;return;}
+  raporTablesDiv.innerHTML="";
+  raporButtonsDiv.innerHTML="";
+  let html=`<h3>Kura Çekme Modu</h3><div class="kuraList">`;
+  names.forEach((n,i)=>{
+    html+=`<div class="kuraCard">
+      <label><input type="checkbox" class="kuraCheck" data-i="${i}"> ${n}</label><br>
+      <small>Kaç kez: <input type="number" min="1" value="1" class="kuraCount" data-i="${i}" style="width:50px"></small>
+    </div>`;
+  });
+  html+=`</div><button id="runKura">Kura Çek</button><div id="kuraSonuc"></div>`;
+  raporTablesDiv.innerHTML=html;
+  raporDiv.style.display="block";raporDiv.dataset.type="kura";raporVisible=true;
+
+  document.getElementById("runKura").addEventListener("click",()=>{
+    let pool=[];
+    document.querySelectorAll(".kuraCheck:checked").forEach(ch=>{
+      let i=ch.dataset.i;
+      let count=parseInt(document.querySelector('.kuraCount[data-i="'+i+'"]').value)||1;
+      for(let c=0;c<count;c++)pool.push(names[i]);
+    });
+    if(pool.length===0){alert("Kimse seçilmedi");return;}
+    let winner=pool[Math.floor(Math.random()*pool.length)];
+    document.getElementById("kuraSonuc").innerHTML=`<h4>Kazanan: 🎉 ${winner}</h4>`;
+  });
+});
+
+// tuş gizle/göster
 document.getElementById("hideButtonsBtn").addEventListener("click",()=>{
-  document.querySelectorAll("#buttons,#raporButtons").forEach(el=>{if(el) el.style.display="none"});
+  document.querySelectorAll("#buttons,#raporButtons").forEach(el=>el.style.display="none");
   showBtn.style.display="block";
 });
 showBtn.addEventListener("click",()=>{
-  document.querySelectorAll("#buttons,#raporButtons").forEach(el=>{if(el) el.style.display="flex"});
+  document.querySelectorAll("#buttons,#raporButtons").forEach(el=>el.style.display="flex");
   showBtn.style.display="none";
 });
 </script>
-
 </body>
 </html>
